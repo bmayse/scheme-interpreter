@@ -7,7 +7,7 @@
 #include "reader.h"
 
 int run_repl();
-void fetch_next_line_into_buffer(buffer* input);
+char* read_line();
 int should_continue(char* given_value);
 int run_on_file(char* file_name);
 
@@ -20,23 +20,24 @@ int main(int argc, char* argv[]) {
 }
 
 int run_repl() {
-    buffer input_buffer;
-    input_buffer.size = SIZE_MAX;
-    input_buffer.data = malloc(SIZE_MAX);
-    fetch_next_line_into_buffer(&input_buffer);
-    while(should_continue(input_buffer.data)) {
-        printf("Processing line: %s\n", input_buffer.data);
-        fetch_next_line_into_buffer(&input_buffer);
+    char* line = read_line();
+    while(should_continue(line)) {
+        printf("Processing line: %s\n", line);
+        free(line);
+        line = read_line();
     }
-    
-    free(input_buffer.data);
+  
+    free(line);
     return 0; 
 }
 
-void fetch_next_line_into_buffer(buffer* input) {
-    getline((char**)&input->data, &input->size, stdin);
-    char* data = input->data;
-    data[strcspn(data, "\n")] = 0;
+char* read_line() {
+    char* line = NULL;
+    size_t max = 0;
+    size_t size = getline(&line, &max, stdin);
+    line[strcspn(line, "\n")] = 0;
+    return line;
+ 
 }
 
 int should_continue(char* given_value) {
